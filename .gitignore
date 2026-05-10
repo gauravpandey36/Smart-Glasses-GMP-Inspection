@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+*.log
+inspection_reports/temp_*
+node_modules/
+.flutter-plugins
+.dart_tool/
+build/

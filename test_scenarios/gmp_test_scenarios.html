@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GMP Inspection Test Scenarios</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; color: #eee; font-family: Arial, sans-serif; }
+.nav { position: fixed; top: 0; left: 0; right: 0; background: #16213e; padding: 10px 20px; 
+       display: flex; align-items: center; gap: 10px; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.nav button { padding: 8px 16px; border: 1px solid #444; background: #0f3460; color: white; 
+              border-radius: 6px; cursor: pointer; font-size: 14px; }
+.nav button:hover { background: #1a56a0; }
+.nav button.active { background: #e94560; border-color: #e94560; }
+.nav .title { font-weight: bold; margin-right: 10px; }
+.nav .scenario-num { background: #e94560; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+.nav .instructions { margin-left: auto; font-size: 12px; color: #999; }
+
+.scenario { display: none; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); }
+.scenario.active { display: block; }
+
+/* GMP Scene Styling */
+.scene { background: #f5f5f0; color: #222; border-radius: 8px; padding: 0; overflow: hidden;
+         max-width: 1200px; margin: 0 auto; min-height: 80vh; position: relative; }
+.scene-header { background: #2c3e50; color: white; padding: 12px 20px; font-size: 14px; 
+                display: flex; justify-content: space-between; }
+.scene-body { padding: 30px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: flex-start; }
+
+/* Status Tags */
+.status-tag { border: 3px solid #333; border-radius: 4px; width: 280px; font-size: 13px; 
+              box-shadow: 2px 2px 8px rgba(0,0,0,0.2); background: white; }
+.status-tag .tag-header { padding: 10px; text-align: center; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
+.status-tag .tag-body { padding: 10px; border-top: 2px solid #333; }
+.status-tag .tag-row { display: flex; padding: 4px 0; border-bottom: 1px solid #ddd; }
+.status-tag .tag-label { font-weight: bold; width: 110px; font-size: 11px; }
+.status-tag .tag-value { flex: 1; font-size: 11px; }
+
+.tag-clean .tag-header { background: #27ae60; color: white; }
+.tag-inuse .tag-header { background: #2980b9; color: white; }
+.tag-quarantine .tag-header { background: #f39c12; color: white; }
+.tag-oos .tag-header { background: #e74c3c; color: white; }
+.tag-maint .tag-header { background: #8e44ad; color: white; }
+.tag-calib .tag-header { background: #16a085; color: white; }
+.tag-released .tag-header { background: #27ae60; color: white; }
+.tag-rejected .tag-header { background: #c0392b; color: white; }
+.tag-error .tag-header { background: #27ae60; color: white; } /* intentionally wrong color */
+
+/* Equipment Labels */
+.equip-label { background: #ecf0f1; border: 2px solid #7f8c8d; border-radius: 4px; 
+               padding: 8px 14px; font-size: 12px; width: 200px; }
+.equip-label .equip-id { font-weight: bold; font-size: 16px; color: #2c3e50; }
+
+/* Logbook */
+.logbook { background: #fffef0; border: 2px solid #8B7355; width: 500px; padding: 0;
+           box-shadow: 3px 3px 10px rgba(0,0,0,0.3); font-family: 'Courier New', monospace; }
+.logbook-header { background: #8B7355; color: white; padding: 8px 12px; font-size: 14px; font-weight: bold; }
+.logbook table { width: 100%; border-collapse: collapse; }
+.logbook td, .logbook th { border: 1px solid #8B7355; padding: 6px 8px; font-size: 12px; }
+.logbook th { background: #d4c5a9; font-size: 11px; }
+.logbook .handwritten { font-family: 'Segoe Script', 'Comic Sans MS', cursive; color: #1a1a8a; }
+.logbook .whiteout { background: white; border: 1px solid #ccc; padding: 2px 4px; color: #333;
+                     text-decoration: none; position: relative; }
+.logbook .strikethrough { text-decoration: line-through; color: #666; }
+
+/* Chemical shelf */
+.chem-container { background: white; border: 2px solid #666; border-radius: 4px; 
+                  width: 160px; padding: 10px; text-align: center; position: relative; }
+.chem-container .chem-label { font-size: 11px; }
+.chem-container .ghs { font-size: 28px; }
+.chem-container .expiry-bad { color: #e74c3c; font-weight: bold; }
+.chem-container .sds-binder { background: #3498db; color: white; padding: 6px 10px;
+                               border-radius: 4px; font-size: 12px; font-weight: bold; width: 120px; text-align: center; }
+
+/* Cleanroom elements */
+.dp-gauge { background: #2c3e50; color: #2ecc71; padding: 15px; border-radius: 8px; 
+            width: 180px; text-align: center; font-family: 'Consolas', monospace; }
+.dp-gauge .reading { font-size: 36px; font-weight: bold; }
+.dp-gauge .unit { font-size: 12px; color: #95a5a6; }
+.dp-gauge .label { font-size: 11px; color: #bdc3c7; margin-top: 5px; }
+
+.temp-display { background: #2c3e50; color: #e74c3c; padding: 12px; border-radius: 8px; 
+                width: 150px; text-align: center; font-family: 'Consolas', monospace; }
+.temp-display .reading { font-size: 32px; font-weight: bold; }
+
+/* Room sign */
+.room-sign { background: #2c3e50; color: white; padding: 12px 20px; border-radius: 4px; 
+             text-align: center; border: 3px solid #1a252f; }
+.room-sign .room-name { font-size: 20px; font-weight: bold; }
+.room-sign .room-class { font-size: 14px; color: #3498db; margin-top: 4px; }
+
+/* Safety elements */
+.safety-sign { text-align: center; padding: 10px; }
+.eyewash-sign { background: #27ae60; color: white; padding: 15px; border-radius: 50%; 
+                width: 100px; height: 100px; display: flex; align-items: center; 
+                justify-content: center; font-size: 11px; font-weight: bold; border: 3px solid #1e8449; }
+.fire-ext { background: #e74c3c; color: white; padding: 10px; border-radius: 4px; 
+            width: 80px; text-align: center; font-size: 11px; font-weight: bold; }
+.exit-sign { background: #27ae60; color: white; padding: 8px 20px; font-size: 18px; 
+             font-weight: bold; border-radius: 4px; }
+.blocked { position: relative; }
+.blocked::after { content: "BLOCKED BY CART"; position: absolute; top: 50%; left: 50%; 
+                  transform: translate(-50%,-50%) rotate(-15deg); background: rgba(231,76,60,0.9); 
+                  color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; }
+
+/* Coffee cup */
+.coffee-cup { font-size: 48px; position: absolute; }
+
+/* Ground truth code */
+.gt-code { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); 
+           color: #666; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+
+/* Sticky mat */
+.sticky-mat { width: 120px; height: 60px; display: flex; align-items: center; justify-content: center;
+              font-size: 10px; font-weight: bold; border: 2px solid #666; }
+.sticky-mat.clean { background: #b8d4e3; color: #2c3e50; }
+.sticky-mat.dirty { background: #7f6b52; color: #ddd; }
+
+/* PPE */
+.ppe-station { background: #ecf0f1; border: 2px solid #3498db; border-radius: 4px; 
+               padding: 10px; width: 200px; }
+.ppe-station .ppe-title { background: #3498db; color: white; padding: 4px 8px; margin: -10px -10px 8px;
+                          font-weight: bold; font-size: 12px; text-align: center; }
+
+/* Shelf label */
+.shelf { background: #ddd; border: 2px solid #999; border-radius: 4px; padding: 15px; width: 100%;
+         display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; align-items: flex-end; }
+.shelf-label { background: #666; color: white; padding: 4px 12px; font-size: 11px; 
+               font-weight: bold; border-radius: 3px; position: absolute; top: -12px; left: 10px; }
+
+.wall { background: linear-gradient(180deg, #e8e0d0 0%, #d5cfc0 100%); min-height: 200px;
+        position: relative; padding: 20px; border-bottom: 8px solid #bbb; }
+
+.floor { background: #c8c0b0; padding: 15px; display: flex; gap: 15px; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span class="title">GMP Test Scenarios</span>
+  <button onclick="showScenario(1)" id="btn1" class="active"><span class="scenario-num">1</span> Equipment Area</button>
+  <button onclick="showScenario(2)" id="btn2"><span class="scenario-num">2</span> Gowning Room</button>
+  <button onclick="showScenario(3)" id="btn3"><span class="scenario-num">3</span> Logbook GDP</button>
+  <button onclick="showScenario(4)" id="btn4"><span class="scenario-num">4</span> Chemical Storage</button>
+  <button onclick="showScenario(5)" id="btn5"><span class="scenario-num">5</span> Production Line</button>
+  <button onclick="showScenario(6)" id="btn6"><span class="scenario-num">6</span> Cleanroom Corridor</button>
+  <button onclick="showScenario(7)" id="btn7"><span class="scenario-num">7</span> Calibration Lab</button>
+  <button onclick="showScenario(8)" id="btn8"><span class="scenario-num">8</span> Material Storage</button>
+  <span class="instructions">Put on Ray-Bans → Look at screen → Say "Hey Meta, take a photo"</span>
+</div>
+
+<!-- SCENARIO 1: Equipment Staging Area -->
+<div class="scenario active" id="s1">
+  <div class="scene">
+    <div class="scene-header">
+      <span>EQUIPMENT STAGING AREA — Room 204 | Formulation Suite</span>
+      <span>GMP Manufacturing Facility</span>
+    </div>
+    <div class="scene-body">
+      <div class="room-sign">
+        <div class="room-name">ROOM 204</div>
+        <div class="room-class">ISO Class 8 / Grade D</div>
+      </div>
+      
+      <div class="status-tag tag-clean">
+        <div class="tag-header">✓ CLEAN ✓</div>
+        <div class="tag-body">
+          <div class="tag-row"><span class="tag-label">Equipment ID:</span><span class="tag-value">MX-2200-01 (Mixer)</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned Date:</span><span class="tag-value">09-MAY-2026</span></div>
+          <div class="tag-row"><span class="tag-label">Clean Hold:</span><span class="tag-value">14 days (expires 23-MAY-2026)</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned By:</span><span class="tag-value">J. Martinez</span></div>
+          <div class="tag-row"><span class="tag-label">Verified By:</span><span class="tag-value">S. Patel</span></div>
+        </div>
+      </div>
+      
+      <div class="status-tag tag-clean">
+        <div class="tag-header">✓ CLEAN ✓</div>
+        <div class="tag-body">
+          <div class="tag-row"><span class="tag-label">Equipment ID:</span><span class="tag-value">TK-1500-03 (Tank)</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned Date:</span><span class="tag-value">07-MAY-2026</span></div>
+          <div class="tag-row"><span class="tag-label">Clean Hold:</span><span class="tag-value">14 days</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned By:</span><span class="tag-value" style="color:#e74c3c; font-style:italic;">[blank]</span></div>
+          <div class="tag-row"><span class="tag-label">Verified By:</span><span class="tag-value" style="color:#e74c3c; font-style:italic;">[blank]</span></div>
+        </div>
+      </div>
+      
+      <div class="equip-label">
+        <div class="equip-id">HMG-0900-03</div>
+        <div>Homogenizer</div>
+        <div style="color:#e74c3c; font-weight:bold; margin-top:5px;">⚠ NO STATUS TAG</div>
+      </div>
+      
+      <div class="dp-gauge">
+        <div class="label">ΔP Room 204</div>
+        <div class="reading">+15</div>
+        <div class="unit">Pa</div>
+        <div class="label">SPEC: +10 to +25 Pa</div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S01: CLEAN-missing-initials, NO-STATUS-TAG, DP-in-spec | Expected: 2xMajor, 1xCritical, 1xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 2: Gowning Area -->
+<div class="scenario" id="s2">
+  <div class="scene">
+    <div class="scene-header">
+      <span>GOWNING AREA — Cleanroom Entry</span>
+      <span>Grade D → Grade C Transition</span>
+    </div>
+    <div class="scene-body">
+      <div class="room-sign">
+        <div class="room-name">GOWNING ROOM</div>
+        <div class="room-class">Grade D → Grade C Entry</div>
+      </div>
+      
+      <div style="background:#ecf0f1; border:2px solid #bdc3c7; padding:15px; border-radius:4px; width:250px;">
+        <div style="font-weight:bold; font-size:14px; margin-bottom:8px; text-align:center;">GOWNING SEQUENCE</div>
+        <div style="font-size:12px; line-height:1.8;">
+          1. Remove jewelry & personal items<br>
+          2. Shoe covers<br>
+          3. Hair cover / beard cover<br>
+          4. Coverall suit<br>
+          5. Face mask<br>
+          6. Safety goggles<br>
+          7. Gloves (double)<br>
+          8. Hand sanitize
+        </div>
+      </div>
+      
+      <div>
+        <div class="sticky-mat dirty">STICKY MAT<br>⚠ SATURATED</div>
+        <div style="font-size:10px; color:#e74c3c; margin-top:4px; text-align:center;">Visibly dirty, needs replacement</div>
+      </div>
+      
+      <div style="background:#ecf0f1; border:2px solid #bdc3c7; padding:15px; border-radius:4px; width:200px;">
+        <div style="font-weight:bold; text-align:center; margin-bottom:8px;">GARMENT STORAGE</div>
+        <div style="font-size:11px; color:#e74c3c;">
+          ⚠ Clean and soiled garments<br>
+          appear to be in SAME bin<br>
+          <span style="font-weight:bold;">No segregation visible</span>
+        </div>
+      </div>
+      
+      <div class="ppe-station">
+        <div class="ppe-title">PPE STATION</div>
+        <div style="font-size:11px;">
+          ✓ Coveralls — stocked<br>
+          ✓ Shoe covers — stocked<br>
+          ✓ Hair covers — stocked<br>
+          ✓ Gloves (S/M/L) — stocked<br>
+          ✓ Face masks — stocked<br>
+          ✓ Hand sanitizer — present
+        </div>
+      </div>
+      
+      <div class="dp-gauge">
+        <div class="label">ΔP Gowning Room</div>
+        <div class="reading" style="color:#e74c3c;">+5</div>
+        <div class="unit">Pa</div>
+        <div class="label" style="color:#e74c3c;">⚠ SPEC: +10 to +25 Pa</div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S02: sticky-mat-saturated, garment-no-segregation, DP-out-of-spec | Expected: 1xCritical, 2xMinor, 1xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 3: Logbook GDP -->
+<div class="scenario" id="s3">
+  <div class="scene">
+    <div class="scene-header">
+      <span>WORKSTATION — Room 112 | Compression Area</span>
+      <span>Open Logbook and Documentation</span>
+    </div>
+    <div class="scene-body" style="flex-direction:column; align-items:center;">
+      <div class="logbook">
+        <div class="logbook-header">EQUIPMENT USE LOG — Tablet Press TP-3300-02 | Logbook No: EUL-2026-0047 | Page 34 of 50</div>
+        <table>
+          <tr>
+            <th>Date</th><th>Time</th><th>Product / Lot</th><th>Activity</th><th>Operator</th><th>Verified</th>
+          </tr>
+          <tr>
+            <td class="handwritten">07-May-2026</td>
+            <td class="handwritten">08:15</td>
+            <td class="handwritten">Metformin 500mg / MET-0541</td>
+            <td class="handwritten">Setup & compression start</td>
+            <td class="handwritten">R. Gupta</td>
+            <td class="handwritten">S. Patel</td>
+          </tr>
+          <tr>
+            <td class="handwritten">07-May-2026</td>
+            <td class="handwritten">16:45</td>
+            <td class="handwritten">Metformin 500mg / MET-0541</td>
+            <td class="handwritten">Compression complete, yield 98.2%</td>
+            <td class="handwritten">R. Gupta</td>
+            <td class="handwritten">S. Patel</td>
+          </tr>
+          <tr>
+            <td class="handwritten">08-May-2026</td>
+            <td class="handwritten">07:30</td>
+            <td class="handwritten">Cleaning per SOP-CLN-042</td>
+            <td class="handwritten"><span class="whiteout">CIP complete</span></td>
+            <td class="handwritten">A. Johnson</td>
+            <td class="handwritten"></td>
+          </tr>
+          <tr>
+            <td class="handwritten">08-May-2026</td>
+            <td class="handwritten">14:00</td>
+            <td class="handwritten">Lisinopril 10mg / LIS-0892</td>
+            <td class="handwritten">Setup for next batch</td>
+            <td class="handwritten">K. Chen</td>
+            <td class="handwritten" style="color:#e74c3c; font-style:italic;"></td>
+          </tr>
+          <tr>
+            <td class="handwritten"></td>
+            <td class="handwritten"></td>
+            <td class="handwritten"></td>
+            <td class="handwritten"></td>
+            <td class="handwritten"></td>
+            <td class="handwritten"></td>
+          </tr>
+        </table>
+      </div>
+      
+      <div style="display:flex; gap:20px; margin-top:15px;">
+        <div style="background:#ecf0f1; border:2px solid #3498db; padding:10px; border-radius:4px; width:180px; text-align:center;">
+          <div style="font-weight:bold; font-size:12px;">SOP HOLDER</div>
+          <div style="font-size:11px; margin-top:5px;">SOP-CLN-042 Rev 05<br>SOP-CMP-018 Rev 12<br>SOP-IPC-007 Rev 03</div>
+          <div style="font-size:10px; color:#27ae60; margin-top:5px;">✓ Current versions</div>
+        </div>
+        
+        <div style="background:#fff3cd; border:2px solid #ffc107; padding:10px; border-radius:4px; width:200px;">
+          <div style="font-weight:bold; font-size:12px; color:#856404;">⚠ OBSERVATIONS:</div>
+          <div style="font-size:11px; color:#856404; margin-top:5px;">
+            • White-out visible on Row 3<br>
+            • Row 4 missing verification signature<br>
+            • Row 5 blank (unused line not struck through)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S03: whiteout-GDP-violation, missing-verification, unused-lines-not-struck | Expected: 1xCritical, 1xMajor, 1xMinor, 1xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 4: Chemical Storage -->
+<div class="scenario" id="s4">
+  <div class="scene">
+    <div class="scene-header">
+      <span>CHEMICAL STORAGE — Room 305 | Dispensing Area</span>
+      <span>Controlled Chemical Storage Shelf</span>
+    </div>
+    <div class="scene-body">
+      <div style="position:relative; width:100%;">
+        <div class="shelf">
+          <div class="chem-container">
+            <div class="ghs">⚠️</div>
+            <div class="chem-label"><strong>Isopropyl Alcohol</strong><br>Lot: IPA-2025-344<br>Exp: <strong>31-DEC-2026</strong><br>Status: <span style="color:#27ae60;">RELEASED</span></div>
+          </div>
+          
+          <div class="chem-container">
+            <div class="ghs">☠️</div>
+            <div class="chem-label"><strong>Sodium Hydroxide 1N</strong><br>Lot: NaOH-2024-118<br>Exp: <span class="expiry-bad">28-FEB-2026 ⚠ EXPIRED</span><br>Status: <span style="color:#27ae60;">RELEASED</span></div>
+          </div>
+          
+          <div class="chem-container">
+            <div class="ghs">🔥</div>
+            <div class="chem-label"><strong>Acetone AR</strong><br>Lot: ACE-2025-201<br>Exp: <strong>30-SEP-2026</strong><br>Status: <span style="color:#27ae60;">RELEASED</span></div>
+          </div>
+          
+          <div class="chem-container">
+            <div class="ghs">⚠️</div>
+            <div class="chem-label"><strong>Hydrochloric Acid 0.1N</strong><br>Lot: HCL-2025-077<br><span style="color:#e74c3c; font-weight:bold;">NO EXPIRY DATE VISIBLE</span><br>Status: <span style="color:#27ae60;">RELEASED</span></div>
+          </div>
+          
+          <div class="sds-binder" style="align-self:center;">📋 SDS BINDER<br>Current Rev.</div>
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:15px; width:100%; justify-content:center; margin-top:10px;">
+        <div class="fire-ext">🧯<br>FIRE<br>EXT.<br><span style="font-size:9px;">Insp: 03/2026</span></div>
+        <div style="background:#fff3cd; border:2px solid #ffc107; padding:10px; border-radius:4px;">
+          <strong>⚠ NOTE:</strong> Flammable (Acetone) stored next to Corrosive (HCl) — no segregation by hazard class
+        </div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S04: expired-chemical, missing-expiry, incompatible-storage, SDS-present | Expected: 1xCritical, 1xMajor, 1xMinor, 1xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 5: Production Line (Line Clearance Issue) -->
+<div class="scenario" id="s5">
+  <div class="scene">
+    <div class="scene-header">
+      <span>PRODUCTION LINE — Room 112 | Tablet Compression</span>
+      <span>Line Clearance Check — Between Batches</span>
+    </div>
+    <div class="scene-body">
+      <div class="status-tag tag-clean">
+        <div class="tag-header">✓ CLEAN ✓</div>
+        <div class="tag-body">
+          <div class="tag-row"><span class="tag-label">Equipment ID:</span><span class="tag-value">TP-3300-02 (Tablet Press)</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned Date:</span><span class="tag-value">08-MAY-2026</span></div>
+          <div class="tag-row"><span class="tag-label">Cleaned By:</span><span class="tag-value">A. Johnson / Verified: M. Lee</span></div>
+        </div>
+      </div>
+      
+      <div style="background:#fff3cd; border:3px solid #e74c3c; padding:15px; border-radius:4px; width:300px;">
+        <div style="font-weight:bold; color:#e74c3c; font-size:16px; text-align:center;">⚠ LINE CLEARANCE FINDING</div>
+        <div style="margin-top:10px; font-size:13px;">
+          <strong>Previous batch label still attached:</strong><br><br>
+          <div style="background:white; border:2px solid #333; padding:8px; text-align:center;">
+            <strong>METFORMIN HCl 500mg</strong><br>
+            Lot: MET-2026-0541<br>
+            Mfg: 07-MAY-2026<br>
+            <span style="color:#e74c3c;">⚠ THIS LABEL SHOULD HAVE BEEN REMOVED</span>
+          </div>
+        </div>
+      </div>
+      
+      <div style="background:#ecf0f1; border:2px solid #27ae60; padding:15px; border-radius:4px; width:280px;">
+        <div style="font-weight:bold; color:#27ae60; text-align:center; margin-bottom:8px;">CURRENT BATCH SETUP</div>
+        <div style="font-size:12px;">
+          <strong>Product:</strong> Lisinopril 10mg Tablets<br>
+          <strong>Lot:</strong> LIS-2026-0892<br>
+          <strong>Batch Record:</strong> Staged at workstation ✓<br>
+          <strong>Line Clearance Form:</strong> <span style="color:#e74c3c;">NOT YET SIGNED</span>
+        </div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S05: prev-batch-label-on-equipment, line-clearance-unsigned | Expected: 1xCritical, 1xMajor, 1xGood(clean-tag)</div>
+  </div>
+</div>
+
+<!-- SCENARIO 6: Cleanroom Corridor - EHS -->
+<div class="scenario" id="s6">
+  <div class="scene">
+    <div class="scene-header">
+      <span>CORRIDOR — Outside Cleanroom Suite</span>
+      <span>EHS Safety Inspection</span>
+    </div>
+    <div class="scene-body">
+      <div class="exit-sign">EXIT →</div>
+      
+      <div class="blocked" style="display:inline-block;">
+        <div class="eyewash-sign">EMERGENCY<br>EYEWASH<br>STATION</div>
+      </div>
+      
+      <div style="background:#fff; border:2px solid #333; padding:15px; border-radius:4px; width:250px;">
+        <div style="font-weight:bold; text-align:center; margin-bottom:8px;">🗺️ EVACUATION MAP</div>
+        <div style="font-size:11px; text-align:center;">
+          Posted: 15-JAN-2024<br>
+          Building 2, Floor 1<br>
+          Assembly Point: Parking Lot B<br>
+          <span style="color:#27ae60;">✓ Current and visible</span>
+        </div>
+      </div>
+      
+      <div class="fire-ext">
+        🧯<br>FIRE<br>EXT.<br>
+        <span style="font-size:9px; color:#ffe0e0;">Insp: <strong>11/2025</strong><br>⚠ OVERDUE</span>
+      </div>
+      
+      <div style="background:#ecf0f1; padding:15px; border-radius:4px; width:200px; text-align:center;">
+        <div style="font-size:13px; font-weight:bold;">CORRIDOR OBSERVATION</div>
+        <div style="font-size:12px; margin-top:8px;">
+          ⚠ Equipment cart blocking<br>eyewash station access<br><br>
+          ✓ Exit sign illuminated<br>
+          ✓ Evacuation map posted<br>
+          ⚠ Fire extinguisher inspection overdue
+        </div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S06: eyewash-blocked, fire-ext-overdue, exit-sign-ok, evac-map-ok | Expected: 1xCritical, 1xMajor, 2xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 7: QC Lab Calibration -->
+<div class="scenario" id="s7">
+  <div class="scene">
+    <div class="scene-header">
+      <span>QC LABORATORY — Room 401</span>
+      <span>Calibration Status Check</span>
+    </div>
+    <div class="scene-body">
+      <div class="status-tag tag-calib">
+        <div class="tag-header">✓ CALIBRATED ✓</div>
+        <div class="tag-body">
+          <div class="tag-row"><span class="tag-label">Equipment:</span><span class="tag-value">BAL-0100-01 (Analytical Balance)</span></div>
+          <div class="tag-row"><span class="tag-label">Cal Date:</span><span class="tag-value">15-MAR-2026</span></div>
+          <div class="tag-row"><span class="tag-label">Next Cal Due:</span><span class="tag-value">15-SEP-2026</span></div>
+          <div class="tag-row"><span class="tag-label">Cal By:</span><span class="tag-value">MetroCal Inc. Cert #MC-26-4421</span></div>
+        </div>
+      </div>
+      
+      <div class="status-tag tag-calib" style="border-color:#e74c3c;">
+        <div class="tag-header" style="background:#e74c3c;">⚠ CALIBRATION EXPIRED ⚠</div>
+        <div class="tag-body">
+          <div class="tag-row"><span class="tag-label">Equipment:</span><span class="tag-value">BAL-0100-04 (Analytical Balance)</span></div>
+          <div class="tag-row"><span class="tag-label">Cal Date:</span><span class="tag-value">15-DEC-2025</span></div>
+          <div class="tag-row"><span class="tag-label">Next Cal Due:</span><span class="tag-value" style="color:#e74c3c; font-weight:bold;">15-DEC-2025 — EXPIRED</span></div>
+          <div class="tag-row"><span class="tag-label">Cal By:</span><span class="tag-value">MetroCal Inc.</span></div>
+        </div>
+      </div>
+      
+      <div class="equip-label" style="border-color:#e74c3c;">
+        <div class="equip-id">pH-0200-02</div>
+        <div>pH Meter</div>
+        <div style="color:#e74c3c; font-weight:bold; margin-top:5px; font-size:11px;">NO CALIBRATION STICKER</div>
+      </div>
+      
+      <div class="temp-display">
+        <div style="font-size:10px; color:#95a5a6;">Lab Temp</div>
+        <div class="reading">22.4°C</div>
+        <div style="font-size:10px; color:#27ae60;">SPEC: 20-25°C ✓</div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S07: cal-expired-BAL04, no-cal-sticker-pH, cal-current-BAL01, temp-ok | Expected: 1xCritical, 1xMajor, 2xGood</div>
+  </div>
+</div>
+
+<!-- SCENARIO 8: Material Storage Area -->
+<div class="scenario" id="s8">
+  <div class="scene">
+    <div class="scene-header">
+      <span>MATERIAL STORAGE — Warehouse Zone B</span>
+      <span>Quarantine vs Released Material Segregation</span>
+    </div>
+    <div class="scene-body">
+      <div style="display:flex; gap:30px; width:100%; justify-content:center;">
+        
+        <div style="border:3px solid #27ae60; padding:15px; border-radius:4px; background:#f0fff0; width:320px;">
+          <div style="background:#27ae60; color:white; padding:8px; text-align:center; font-weight:bold; margin:-15px -15px 10px; border-radius:4px 4px 0 0;">
+            RELEASED AREA</div>
+          <div class="status-tag tag-released" style="width:auto; margin-bottom:10px;">
+            <div class="tag-header" style="font-size:16px;">RELEASED ✓</div>
+            <div class="tag-body">
+              <div class="tag-row"><span class="tag-label">Material:</span><span class="tag-value">Microcrystalline Cellulose NF</span></div>
+              <div class="tag-row"><span class="tag-label">Lot:</span><span class="tag-value">MCC-2026-0155</span></div>
+              <div class="tag-row"><span class="tag-label">Expiry:</span><span class="tag-value">30-NOV-2027</span></div>
+              <div class="tag-row"><span class="tag-label">Released By:</span><span class="tag-value">QC — T. Nakamura</span></div>
+            </div>
+          </div>
+          
+          <div style="background:#fff3cd; border:2px solid #e74c3c; padding:8px; border-radius:4px; margin-top:8px;">
+            <div style="font-weight:bold; color:#e74c3c; font-size:12px;">⚠ QUARANTINE MATERIAL FOUND IN RELEASED AREA:</div>
+            <div class="status-tag tag-quarantine" style="width:auto; margin-top:5px;">
+              <div class="tag-header" style="font-size:14px;">⚠ QUARANTINE ⚠</div>
+              <div class="tag-body" style="font-size:11px;">
+                <div class="tag-row"><span class="tag-label">Material:</span><span class="tag-value">Lactose Monohydrate NF</span></div>
+                <div class="tag-row"><span class="tag-label">Lot:</span><span class="tag-value">LAC-2026-0298</span></div>
+                <div class="tag-row"><span class="tag-label">Status:</span><span class="tag-value" style="color:#e74c3c;">PENDING QC RELEASE</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="border:3px solid #f39c12; padding:15px; border-radius:4px; background:#fff9e6; width:250px;">
+          <div style="background:#f39c12; color:white; padding:8px; text-align:center; font-weight:bold; margin:-15px -15px 10px; border-radius:4px 4px 0 0;">
+            QUARANTINE AREA</div>
+          <div class="status-tag tag-quarantine" style="width:auto;">
+            <div class="tag-header">⚠ QUARANTINE ⚠</div>
+            <div class="tag-body">
+              <div class="tag-row"><span class="tag-label">Material:</span><span class="tag-value">Magnesium Stearate NF</span></div>
+              <div class="tag-row"><span class="tag-label">Lot:</span><span class="tag-value">MGS-2026-0401</span></div>
+              <div class="tag-row"><span class="tag-label">Received:</span><span class="tag-value">06-MAY-2026</span></div>
+              <div class="tag-row"><span class="tag-label">Status:</span><span class="tag-value">Sampling in progress</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="temp-display" style="margin-top:15px;">
+        <div style="font-size:10px; color:#95a5a6;">Warehouse Temp</div>
+        <div class="reading">21.8°C</div>
+        <div style="font-size:10px; color:#27ae60;">SPEC: 15-25°C ✓</div>
+      </div>
+    </div>
+    <div class="gt-code">GT-S08: quarantine-in-released-area, no-segregation | Expected: 1xCritical, 1xGood(released-label), 1xGood(temp)</div>
+  </div>
+</div>
+
+<script>
+function showScenario(n) {
+  document.querySelectorAll('.scenario').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  document.getElementById('btn'+n).classList.add('active');
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  const current = document.querySelector('.scenario.active');
+  const id = parseInt(current.id.replace('s',''));
+  if (e.key === 'ArrowRight' && id < 8) showScenario(id+1);
+  if (e.key === 'ArrowLeft' && id > 1) showScenario(id-1);
+});
+</script>
+
+</body>
+</html>

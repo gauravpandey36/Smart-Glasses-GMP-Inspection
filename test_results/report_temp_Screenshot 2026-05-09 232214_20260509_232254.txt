@@ -1,0 +1,52 @@
+GMP INSPECTION REPORT
+Generated: 2026-05-09T23:22:54.610485
+Image: temp_Screenshot 2026-05-09 232214.png
+Skill: gdp
+Model: claude-sonnet-4-20250514
+Response time: 14.5s
+Tokens: 1979 in / 615 out
+============================================================
+
+```
+INSPECTION OBSERVATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Skill Applied: GDP Check
+Photo: QC Laboratory Room 401 showing calibration status labels on analytical equipment, including one green "CALIBRATED" tag and one red "CALIBRATION EXPIRED" tag, plus equipment ID label and digital temperature display
+Location: QC Laboratory - Room 401
+Domains assessed: Equipment and Instrumentation, Good Documentation Practice
+
+FINDINGS:
+
+[1] SEVERITY: Critical
+    Domain: Equipment and Instrumentation
+    Observation: Red "CALIBRATION EXPIRED" tag visible on analytical equipment (appears to be pH meter based on adjacent ID label pH-6200-62). Equipment with expired calibration should not be available for use in GMP testing.
+    Regulatory Reference: 21 CFR 211.160(b)(4), EU GMP Chapter 6.15
+    Recommended Action: Verify if this equipment is tagged "Do Not Use" and physically segregated from calibrated equipment. Confirm no testing has been performed with expired calibrated equipment. Review calibration program compliance.
+
+[2] SEVERITY: Minor
+    Domain: Equipment and Instrumentation  
+    Observation: Equipment ID label (pH-6200-62) appears legible and properly affixed, which is good practice for equipment identification and traceability.
+    Regulatory Reference: 21 CFR 211.180, EU GMP Chapter 6
+    Recommended Action: Verify equipment ID matches equipment database/inventory records.
+
+[3] SEVERITY: Good Practice
+    Domain: Equipment and Instrumentation
+    Observation: Green "CALIBRATED" tag visible on adjacent equipment shows clear visual status indication with calibration dates visible (19 MAR 2025 cal date, next cal due 18 SEP 2025).
+    Regulatory Reference: 21 CFR 211.160(b)(4)
+    Recommended Action: Acknowledge proper calibration status labeling system in place.
+
+NOT ASSESSABLE FROM THIS IMAGE:
+- Specific calibration dates on expired tag (text too small to read clearly)
+- Whether expired equipment is physically restricted from use
+- Logbook entries and documentation practices
+- Ink color compliance for any handwritten entries
+- ALCOA+ compliance of calibration records
+- Correction practices in associated documentation
+
+INSPECTOR ACTION REQUIRED:
+- Immediately verify status of equipment with expired calibration tag
+- Confirm no testing performed with expired calibrated equipment since expiration
+- Review calibration program procedures and compliance
+- Examine associated calibration records for GDP compliance
+- This report is a pre-screening aid, not a GxP record
+```

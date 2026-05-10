@@ -1,0 +1,53 @@
+GMP INSPECTION REPORT
+Generated: 2026-05-09T23:23:14.423709
+Image: temp_Screenshot 2026-05-09 232214.png
+Skill: auto
+Model: claude-sonnet-4-20250514
+Response time: 15.4s
+Tokens: 1970 in / 659 out
+============================================================
+
+```
+INSPECTION OBSERVATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Skill Applied: Auto-Detect
+Photo: QC Laboratory Room 401 showing calibration status labels on analytical equipment, including one green "CALIBRATED" label, one red "CALIBRATION EXPIRED" label, an equipment ID label (pH-6200-62), and a digital temperature display showing 22.4°C
+Location: QC Laboratory - Room 401
+Domains assessed: Equipment and Instrumentation, Area Status and Labeling
+
+FINDINGS:
+
+[1] SEVERITY: Critical
+    Domain: Equipment and Instrumentation
+    Observation: Red "CALIBRATION EXPIRED" label visible on analytical equipment (appears to be pH meter based on adjacent pH-6200-62 ID label). Equipment with expired calibration should not be available for use in GMP operations.
+    Regulatory Reference: 21 CFR 211.160(b)(4) - Laboratory controls must include calibration of instruments; EU GMP Chapter 6 - Equipment used for testing must be calibrated
+    Recommended Action: Immediately verify if this equipment is quarantined/out of service. If still in use, remove from service, investigate any testing performed since calibration expiry, and assess impact on product quality.
+
+[2] SEVERITY: Good Practice
+    Domain: Equipment and Instrumentation
+    Observation: Clear, visible calibration status labeling system in use with color coding (green for calibrated, red for expired). Equipment ID label (pH-6200-62) is clearly visible and legible.
+    Regulatory Reference: 21 CFR 211.160 - Good calibration control practices
+    Recommended Action: Acknowledge effective visual calibration status system.
+
+[3] SEVERITY: Informational
+    Domain: Equipment and Instrumentation
+    Observation: Digital temperature display showing 22.4°C suggests environmental monitoring in the laboratory space.
+    Regulatory Reference: 21 CFR 211.42(c)(10) - Adequate environmental controls
+    Recommended Action: Verify temperature is within specified range for laboratory operations.
+
+NOT ASSESSABLE FROM THIS IMAGE:
+- Actual calibration dates and due dates (text too small to read clearly)
+- Whether expired equipment has "Do Not Use" tags
+- Current date to assess how long calibration has been expired
+- Whether equipment is physically isolated or quarantined
+- Laboratory logbook entries for equipment status
+- Environmental monitoring acceptance criteria for temperature
+
+INSPECTOR ACTION REQUIRED:
+- Immediately verify status of equipment with expired calibration label
+- Confirm expired equipment is removed from use if still accessible
+- Review calibration program effectiveness and overdue equipment procedures
+- Check laboratory records for any testing performed with expired equipment
+- Verify environmental monitoring program for temperature control
+- This report is a pre-screening aid, not a GxP record
+```
