@@ -108,7 +108,7 @@ This is a **decision-support tool**. The AI surfaces observations; the qualified
 
 **Gourav Pandey**
 Principal Manager, R&D GMP PharmSci Quality
-Takeda Pharmaceuticals
+
 
 ## License
 
