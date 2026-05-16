@@ -107,7 +107,7 @@ This is a **decision-support tool**. The AI surfaces observations; the qualified
 ## Author
 
 **Gourav Pandey**
-Principal Manager, R&D GMP PharmSci Quality
+
 
 
 ## License
